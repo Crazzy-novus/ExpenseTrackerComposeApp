@@ -14,7 +14,7 @@ fun CustomFloatingActionButton(onClick: () -> Unit) {
     ) {
         Icon(painter = painterResource(
             R.drawable.floating_action_btn),
-            "Floating action button."
+            contentDescription = "Floating action button."
         )
     }
 }

@@ -4,26 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.myexpensetracker.theme.MyExpenseTrackerTheme
+import com.example.myexpensetracker.ui.theme.MyExpenseTrackerTheme
 import com.example.myexpensetracker.screens.ExpenseRecordCreationScreen
 
 class CreateExpenseActivity : ComponentActivity() {
-    var recordId : Int? = null
+
+    private var recordIndex : Int? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        val intent = intent
-        recordId = intent.getStringExtra("recordId")?.toInt()
+        // Get the record Id from the intent to get particular record from list
+        recordIndex = intent.getStringExtra("recordIndex")?.toInt()
+
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+
         setContent {
+
             MyExpenseTrackerTheme {
-               ExpenseRecordCreationScreen(recordId)
+               ExpenseRecordCreationScreen(recordIndex)
             }
         }
     }

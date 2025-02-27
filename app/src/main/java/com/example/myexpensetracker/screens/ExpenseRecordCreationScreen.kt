@@ -1,21 +1,16 @@
 package com.example.myexpensetracker.screens
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,7 +21,6 @@ import com.example.myexpensetracker.components.AppTopToolBar
 import com.example.myexpensetracker.components.buttons.CustomButton
 import com.example.myexpensetracker.components.textField.CustomTextField
 import com.example.myexpensetracker.components.DatePickerModal
-import com.example.myexpensetracker.components.ListBottomList
 import com.example.myexpensetracker.models.ExpenseRecord
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -34,26 +28,36 @@ import java.util.Locale
 
 
 @Composable
-fun ExpenseRecordCreationScreen(recordId : Int?)
+fun ExpenseRecordCreationScreen(recordIndex : Int?)
 {
-    // Create Record Object to store Details
+    // Create Empty Record Object to store Record Details
     var record = ExpenseRecord()
 
     // Get the current date in milliseconds
     val currentDateMillis = System.currentTimeMillis()
-    val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val currentDateString = sdf.format(Date(currentDateMillis))
+
+    // Format the date to dd/MM/yyy format
+    val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val currentDateString = simpleDateFormat.format(Date(currentDateMillis))
+
+    // Store the current date to record object to set default date
     record.date = currentDateString
+
     var amountString = "" // this variable is used to store empty string for amount
-    if (recordId != null)
+
+    // Copy the record from list if it edit operation
+    // RecordIndex is null than it create operation else edit operation
+    if (recordIndex != null)
     {
-        record = MainActivity.ExpenseRecordData.userExpenseRecord[recordId].copy() // TODO Need to pass reference
+        // Load the record from the list to edit the record
+        record = MainActivity.ExpenseRecordData.userExpenseRecord[recordIndex].copy() // TODO Need to pass reference
         amountString = record.amount.toString()
     }
 
+    //
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     //TODO (Add validation)
-    var showModal by remember { mutableStateOf(false) }
+    var showDatePickerDialog by remember { mutableStateOf(false) } //
     var showBottomSheet by remember { mutableStateOf(false) }
     var date by remember { mutableStateOf(record.date) }
     var amount by remember { mutableStateOf(amountString) }
@@ -96,20 +100,20 @@ fun ExpenseRecordCreationScreen(recordId : Int?)
                 readOnly = true,
                 trailingIcon = R.drawable.date_icon,
                 onClick = {
-                    showModal = true
+                    showDatePickerDialog = true
                 }
             )
-            if (showModal)
+            if (showDatePickerDialog)
             {
                 DatePickerModal(
                     onDateSelected = {
                         if (it != null)
                         {
                             val temDate = Date(it)
-                            date = sdf.format(temDate)
+                            date = simpleDateFormat.format(temDate)
                         }
                     },
-                    onDismiss = { showModal = false }
+                    onDismiss = { showDatePickerDialog = false }
                 )
             }
 
@@ -164,7 +168,7 @@ fun ExpenseRecordCreationScreen(recordId : Int?)
                         category = category,
                         description = description,
                         record = record,
-                        recordId = recordId
+                        recordId = recordIndex
                         )
                     backDispatcher?.onBackPressed()
                 }

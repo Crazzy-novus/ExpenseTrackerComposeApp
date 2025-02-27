@@ -1,6 +1,5 @@
 package com.example.myexpensetracker.screens
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.background
@@ -29,7 +28,6 @@ import com.example.myexpensetracker.components.buttons.CustomFloatingActionButto
 import com.example.myexpensetracker.components.textField.CustomSearchBar
 import com.example.myexpensetracker.ui.theme.MyExpenseTrackerTheme
 
-@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun HomeScreen(
     context: Context,
@@ -37,12 +35,13 @@ fun HomeScreen(
     onThemeIconClicked : () -> Unit
 )
 {
-    val expenseListState = MainActivity.ExpenseRecordData.userExpenseRecord
+    val expenseListStateItems = MainActivity.ExpenseRecordData.userExpenseRecord
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.secondary),
+            .fillMaxSize(),
+
         topBar = {
+
             AppTopToolBar(
                 title = stringResource(R.string.Expense_Tracker),
                 rightIcon = themeIcon,
@@ -66,46 +65,48 @@ fun HomeScreen(
                 .padding(horizontal = 20.dp),
         )
         {
+            // Local Variable to store Search text
             var searchText by remember { mutableStateOf("") }
+
             CustomSearchBar(
                 value = searchText,
                 onValueChanged = {
                     searchText = it
                 }
             )
+
             LazyColumn{
 
-                itemsIndexed(expenseListState) {
-                        index, item ->  CustomCard(
-                    date = item.date,
-                    amount = item.amount,
-                    category = item.expenseCategory,
-                    description = item.description,
-                    onClick = {
-                        navigateToExpenseRecordScreen(context = context, index)
-                    }
-                )
+                itemsIndexed(expenseListStateItems) {
+                    index, item ->  CustomCard(
+                        date = item.date,
+                        amount = item.amount,
+                        category = item.expenseCategory,
+                        description = item.description,
+                        onClick = {
+                            navigateToExpenseRecordScreen(context = context, index)
+                        }
+                    )
                 }
             }
         }
-
     }
-
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     MyExpenseTrackerTheme {
-//        HomeScreen(innerPaddingValues = PaddingValues(0.dp), 1)
+//        HomeScreen(this,)
     }
 }
 
-fun navigateToExpenseRecordScreen(context: Context, recordId : Int? = null)
+fun navigateToExpenseRecordScreen(context: Context, recordIndex : Int? = null)
 {
     val intent = Intent(context, CreateExpenseActivity::class.java)
-    if (recordId != null) {
-        intent.putExtra("recordId", recordId.toString())
+    // if recordId is null then Trigger Create Operation else Edit existing record
+    if (recordIndex != null) {
+        intent.putExtra("recordIndex", recordIndex.toString())
     }
     context.startActivity(intent)
 
