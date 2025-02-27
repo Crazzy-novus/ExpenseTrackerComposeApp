@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">myExpenseTracker</string>
+    <!--    App ToolBar Strings-->
+    <string name="Expense_Tracker">Expense Tracker</string>
+
+    <!--    Search Bar String-->
+    <string name="search">Search</string>
+    <string name="Select_Category">Select Category</string>
+
+    <!--    Inout Text Labels on Creation Page-->
+    <string name="enter_amount">Enter Amount</string>
+    <string name="enter_Date">Enter Date</string>
+    <string name="enter_description">Enter Description</string>
+    <string name="enter_category">Enter Category</string>
+
+    <!--   Inout Text placeHolders on Creation Page -->
+    <string name="amount">Eg:100</string>
+    <string name="date">Eg:dd/mm/yyyy</string>
+    <string name="description">Eg:This expense is for Food </string>
+    <string name="category">Eg: Food</string>
+
+    <!--    Button Text-->
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="title_activity_create_expense">CreateExpenseActivity</string>
+
+</resources>
