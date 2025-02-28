@@ -7,14 +7,14 @@ import androidx.compose.ui.text.style.TextAlign
 
 
 @Composable
-fun <T> NormalText(
-    text : T,
+fun NormalText(
+    text : String,
     modifier: Modifier,
     textAlignment : TextAlign
 )
 {
     Text(
-        text = "$text",
+        text = text,
         modifier = modifier,
         textAlign = textAlignment
     )

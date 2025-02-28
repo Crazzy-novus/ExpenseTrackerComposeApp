@@ -20,9 +20,9 @@ import com.example.myexpensetracker.R
 fun AppTopToolBar(
     title : String,
     rightIcon : Int? = null,
-    onClickAction: (() -> Unit)? = null,
-    navigationIconId: Int,
-    navigationIconAction: () -> Unit,
+    onClickAction: () -> Unit = {},
+    navigationIconId: Int? = null,
+    navigationIconAction: () -> Unit = {},
 
 )
 {
@@ -32,22 +32,28 @@ fun AppTopToolBar(
                 text = title
             )
         },
+
         navigationIcon = {
-            IconButton(
-                onClick = navigationIconAction
-            )
+            if (navigationIconId != null)
             {
-                Icon(painter = painterResource(navigationIconId),
-                    contentDescription = "backIcon",
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(7.dp)
+                IconButton(
+                    onClick = navigationIconAction
                 )
+
+                {
+                    Icon(painter = painterResource(navigationIconId),
+                        contentDescription = "backIcon",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(7.dp)
+                    )
+                }
             }
         },
         actions = {
 
-            if (rightIcon != null && onClickAction != null ) {
+            if (rightIcon != null)
+            {
                 IconButton(
                     onClick = onClickAction
                 )

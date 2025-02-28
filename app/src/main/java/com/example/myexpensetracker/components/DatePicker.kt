@@ -44,7 +44,7 @@ fun DatePickerModal(
 
 @Preview
 @Composable
-fun deisplay()
+fun DisplayDatePickerDialog()
 {
     var showModal by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<Long?>(null) }

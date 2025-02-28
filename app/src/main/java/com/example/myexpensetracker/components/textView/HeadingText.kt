@@ -7,17 +7,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
-fun <T> HeadingText(
-    text : T,
+fun HeadingText(
+    text : String,
     modifier: Modifier,
     textAlignment : TextAlign
 )
 {
     Text(
-        text = "$text",
+        text = text,
         modifier = modifier,
         textAlign = textAlignment,
         fontWeight = FontWeight.Bold
     )
-
 }

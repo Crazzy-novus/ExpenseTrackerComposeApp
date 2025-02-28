@@ -1,5 +1,8 @@
 package com.example.myexpensetracker.screens
 
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,14 +16,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.fastCbrt
 import com.example.myexpensetracker.R
-import com.example.myexpensetracker.activity.MainActivity
 import com.example.myexpensetracker.components.AppTopToolBar
 import com.example.myexpensetracker.components.buttons.CustomButton
 import com.example.myexpensetracker.components.textField.CustomTextField
 import com.example.myexpensetracker.components.DatePickerModal
+import com.example.myexpensetracker.components.BottomSheetList
 import com.example.myexpensetracker.models.ExpenseRecord
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -28,35 +33,34 @@ import java.util.Locale
 
 
 @Composable
-fun ExpenseRecordCreationScreen(recordIndex : Int?)
+fun ExpenseRecordCreationScreen(
+    activity: ComponentActivity,
+    record : ExpenseRecord,
+    categoryList : ArrayList<String>
+)
 {
-    // Create Empty Record Object to store Record Details
-    var record = ExpenseRecord()
 
-    // Get the current date in milliseconds
-    val currentDateMillis = System.currentTimeMillis()
-
-    // Format the date to dd/MM/yyy format
     val simpleDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    val currentDateString = simpleDateFormat.format(Date(currentDateMillis))
 
-    // Store the current date to record object to set default date
-    record.date = currentDateString
-
+    // Create Empty Record Object to store Record Details
     var amountString = "" // this variable is used to store empty string for amount
 
-    // Copy the record from list if it edit operation
-    // RecordIndex is null than it create operation else edit operation
-    if (recordIndex != null)
+    if (record.date != "")
     {
-        // Load the record from the list to edit the record
-        record = MainActivity.ExpenseRecordData.userExpenseRecord[recordIndex].copy() // TODO Need to pass reference
         amountString = record.amount.toString()
     }
+    else
+    {
+        // Get the current date in milliseconds
+        val currentDateMillis = System.currentTimeMillis()
+        // Format the date to dd/MM/yyy format
+        val currentDateString = simpleDateFormat.format(Date(currentDateMillis))
+        // Store the current date to record object to set default date
+        record.date = currentDateString
 
-    //
+    }
+
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
-    //TODO (Add validation)
     var showDatePickerDialog by remember { mutableStateOf(false) } //
     var showBottomSheet by remember { mutableStateOf(false) }
     var date by remember { mutableStateOf(record.date) }
@@ -101,8 +105,10 @@ fun ExpenseRecordCreationScreen(recordIndex : Int?)
                 trailingIcon = R.drawable.date_icon,
                 onClick = {
                     showDatePickerDialog = true
-                }
+                },
+                enabled = false
             )
+
             if (showDatePickerDialog)
             {
                 DatePickerModal(
@@ -116,18 +122,28 @@ fun ExpenseRecordCreationScreen(recordIndex : Int?)
                     onDismiss = { showDatePickerDialog = false }
                 )
             }
-
+            var isError by remember { mutableStateOf(false) }
             CustomTextField(
+
                 textValue = amount,
                 onTextChanged = {
+                    // TODO Try to reduce the number of if condition
                     if (it.isEmpty() || it.toDoubleOrNull() != null)
                     {
                         amount = it
+                        isError = false
                     }
-                    //TODO : Add invalidation notification
+                    else
+                    {
+                        amount = it
+                        isError = true
+                    }
                 },
                 label = stringResource(R.string.enter_amount),
-                placeHolder = stringResource(R.string.amount)
+                placeHolder = stringResource(R.string.amount),
+                isError = isError,
+                supportText = stringResource(R.string.invalid_amount),
+                keyboardType = KeyboardType.Number
             )
 
             CustomTextField(
@@ -138,17 +154,23 @@ fun ExpenseRecordCreationScreen(recordIndex : Int?)
                 label = stringResource(R.string.enter_category),
                 placeHolder = stringResource(R.string.category),
                 trailingIcon = R.drawable.down_arrow,
+                enabled = false,
                 onClick = {showBottomSheet = true}
             )
 
-//            if (showBottomSheet)
-//            {
-//                ListBottomList (
-//                    onDismissRequest = {
-//                        showBottomSheet = false
-//                    }
-//                )
-//            }
+            if (showBottomSheet)
+            {
+                BottomSheetList (
+                    expenseCategoryList = categoryList,
+                    onItemSelected = { selectedCategory ->
+                        category = selectedCategory
+                        showBottomSheet = false
+                    },
+                    onDismissRequest = {
+                        showBottomSheet = false
+                    }
+                )
+            }
 
             CustomTextField(
                 textValue = description,
@@ -162,35 +184,38 @@ fun ExpenseRecordCreationScreen(recordIndex : Int?)
             CustomButton(
                 text = stringResource(R.string.save),
                 onClickAction = {
-                    saveExpenseRecord(
-                        date = date,
-                        amount = amount.toFloat(),
-                        category = category,
-                        description = description,
-                        record = record,
-                        recordId = recordIndex
+                    if (amount.toDoubleOrNull() != null)
+                    {
+                        saveExpenseRecord(
+                            activity = activity,
+                            date = date,
+                            amount = amount.toFloat(),
+                            category = category,
+                            description = description,
+                            record = record
                         )
-                    backDispatcher?.onBackPressed()
+                        backDispatcher?.onBackPressed()
+                    }
+                    else {
+                        isError = true
+                    }
                 }
             )
         }
     }
 }
 
-fun saveExpenseRecord(date: String, amount: Float, category : String, description : String, record: ExpenseRecord, recordId: Int? = null)
+fun saveExpenseRecord(activity: ComponentActivity, date: String, amount: Float, category : String, description : String, record: ExpenseRecord)
 {
     record.date = date
     record.amount = amount
     record.expenseCategory = category
     record.description = description
-    if (recordId != null)
-    {
-        MainActivity.ExpenseRecordData.userExpenseRecord[recordId] = record
+    val resultIntent = Intent().apply {
+        putExtra("recordObject", record)
     }
-    else
-    {
-        MainActivity.ExpenseRecordData.userExpenseRecord.add(record)
-    }
+    activity.setResult(Activity.RESULT_OK, resultIntent)
+    activity.finish()
 }
 
 @Preview(showBackground = true)
@@ -198,5 +223,5 @@ fun saveExpenseRecord(date: String, amount: Float, category : String, descriptio
 fun DisplayMode1()
 {
 //    TextView("Amount")
-   ExpenseRecordCreationScreen(0)
+//   ExpenseRecordCreationScreen(0)
 }

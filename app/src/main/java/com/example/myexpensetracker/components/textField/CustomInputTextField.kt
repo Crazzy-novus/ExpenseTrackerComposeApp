@@ -2,6 +2,7 @@ package com.example.myexpensetracker.components.textField
 
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,17 +28,22 @@ fun CustomTextField(
     placeHolder: String,
     readOnly: Boolean = false,
     trailingIcon: Int? = null,
-    onClick: (() -> Unit) = {}
+    onClick: () -> Unit = {},
+    isError: Boolean = false,
+    supportText : String = "",
+    enabled : Boolean = true,
+    keyboardType: KeyboardType = KeyboardType.Text
 ) {
     TextField(
         modifier = Modifier
             .padding(vertical = 10.dp)
-            .clickable( onClick = onClick) // TODO: need to verify not working onclick
+            .clickable (onClick = onClick ) // TODO: need to verify not working onclick
             .fillMaxWidth(),
         value = textValue,
         onValueChange = { newValue ->
             onTextChanged(newValue)
         },
+
         label = {
             Text(
                 text = "$label*",
@@ -45,11 +51,16 @@ fun CustomTextField(
                 fontSize = 16.sp
             )
         },
+
         placeholder = {
             Text(text = placeHolder)
         },
+
         readOnly = readOnly,
+        enabled = enabled,
+
         trailingIcon = {
+
             if (trailingIcon != null )
             {
                 IconButton(
@@ -65,10 +76,17 @@ fun CustomTextField(
                 }
             }
         },
+        isError = isError,
+        supportingText = {
+            if (isError)
+            {
+                Text(text = "*$supportText")
+            }
+        },
 
         singleLine = true,
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text
+            keyboardType = keyboardType
         ),
     )
 }

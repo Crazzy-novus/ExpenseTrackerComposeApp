@@ -22,10 +22,8 @@ class MainActivity : ComponentActivity() {
     // Initialize the Shared Preference Instance to get stored data
     private lateinit var sharedPreferences: SharedPreferences
 
-    // List object initialization for global Access
-    object ExpenseRecordData {
-        var userExpenseRecord = mutableStateListOf<ExpenseRecord>()
-    }
+    private var userExpenseRecord = mutableStateListOf<ExpenseRecord>()
+    private var categoryList = (arrayListOf ("Food", "Trip", "Petrol", "Party"))
 
     private var darkTheme by mutableStateOf(false)
 
@@ -34,6 +32,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         sharedPreferences = getSharedPreferences("ExpenseTrackerPrefs", MODE_PRIVATE)
+
         loadExpenseRecords() // Load stored expenses on startup
 
         enableEdgeToEdge()
@@ -42,11 +41,14 @@ class MainActivity : ComponentActivity() {
 
             // To Icon Corresponding to Theme
             val themeIconId = if (darkTheme) R.drawable.dark_theme_icon_50 else R.drawable.light_theme_icon_50
+
             // To store the transition value of icon while click the icon
             MyExpenseTrackerTheme(darkTheme = darkTheme)
             {
                 HomeScreen(
                     context = this,
+                    userExpenseRecordList = userExpenseRecord,
+                    categoryList = categoryList,
                     themeIcon = themeIconId,
                     onThemeIconClicked = {
                         darkTheme = !darkTheme
@@ -65,23 +67,30 @@ class MainActivity : ComponentActivity() {
     private fun saveExpenseRecords() {
         val editor = sharedPreferences.edit()
 
-        // Initialize json to store list in shared preference
-        val gson = Gson()
-        val json = gson.toJson(ExpenseRecordData.userExpenseRecord)
-        editor.putString("userExpenseRecord", json)
+        if (userExpenseRecord.isNotEmpty())
+        {
+            // Initialize json to store list in shared preference
+            val gson = Gson()
+            val json = gson.toJson(userExpenseRecord)
+            editor.putString("userExpenseRecord", json)
+        }
+
         editor.putBoolean("themeState", darkTheme)
         editor.apply()
     }
 
     // Load the List of expense When activity creates
-    private fun loadExpenseRecords() {
+    private fun loadExpenseRecords()
+    {
+        val json = sharedPreferences.getString("userExpenseRecord", null) ?: return // Return null if no preference is available
+
+        // If json is not null decode the json string to ExpenseRecordObject
         val gson = Gson()
-        val json = sharedPreferences.getString("userExpenseRecord", null)
         val type = object : TypeToken<MutableList<ExpenseRecord>>() {}.type
         val savedList: MutableList<ExpenseRecord> = gson.fromJson(json, type) ?: mutableListOf()
 
-        ExpenseRecordData.userExpenseRecord.clear()
-        ExpenseRecordData.userExpenseRecord.addAll(savedList)
+        userExpenseRecord.clear()
+        userExpenseRecord.addAll(savedList)
         darkTheme = sharedPreferences.getBoolean("themeState", true) // Default to light mode (false)
     }
 
